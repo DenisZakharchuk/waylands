@@ -144,11 +144,11 @@ bind = SUPER, 2, workspace, 2
 bind = SUPER, 3, workspace, 3
 bind = SUPER, 4, workspace, 4
 bind = SUPER, 5, workspace, 5
-bind = SUPER, SHIFT, 1, movetoworkspace, 1
-bind = SUPER, SHIFT, 2, movetoworkspace, 2
-bind = SUPER, SHIFT, 3, movetoworkspace, 3
-bind = SUPER, SHIFT, 4, movetoworkspace, 4
-bind = SUPER, SHIFT, 5, movetoworkspace, 5
+bind = SUPER SHIFT, 1, movetoworkspace, 1
+bind = SUPER SHIFT, 2, movetoworkspace, 2
+bind = SUPER SHIFT, 3, movetoworkspace, 3
+bind = SUPER SHIFT, 4, movetoworkspace, 4
+bind = SUPER SHIFT, 5, movetoworkspace, 5
 
 # Screenshot — region to clipboard
 bind = , Print, exec, grim -g "$(slurp)" - | wl-copy
