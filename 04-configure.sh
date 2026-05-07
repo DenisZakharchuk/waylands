@@ -150,8 +150,10 @@ bind = SUPER, SHIFT, 3, movetoworkspace, 3
 bind = SUPER, SHIFT, 4, movetoworkspace, 4
 bind = SUPER, SHIFT, 5, movetoworkspace, 5
 
-# Screenshot
-bind = , Print, exec, grim -g "$(slurp)" - | swappy -f -
+# Screenshot — region to clipboard
+bind = , Print, exec, grim -g "$(slurp)" - | wl-copy
+# Screenshot — full screen to ~/Pictures
+bind = SHIFT, Print, exec, grim "$HOME/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
 
 # Autostart
 exec-once = waybar

@@ -20,7 +20,6 @@ sudo apt install -y \
   mako-notifier \
   grim \
   slurp \
-  swappy \
   wl-clipboard \
   cliphist \
   wlsunset \

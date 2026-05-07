@@ -43,7 +43,6 @@ sudo apt install -y \
   mako-notifier \
   grim \
   slurp \
-  swappy \
   wl-clipboard \
   cliphist \
   policykit-1-gnome \

@@ -70,7 +70,6 @@ check_cmd "foot        " foot
 check_cmd "mako        " mako
 check_cmd "grim        " grim
 check_cmd "slurp       " slurp
-check_cmd "swappy      " swappy
 check_cmd "wlsunset    " wlsunset
 check_cmd "kanshi      " kanshi
 check_cmd "brightnessctl" brightnessctl

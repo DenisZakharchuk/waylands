@@ -18,13 +18,13 @@ All three sessions coexist at the LightDM login screen — select one at boot.
 | **Hyprland** | Wayland | Dynamic tiling, animated, visual polish |
 
 ### Sway stack (all from official Ubuntu 24.04 repos)
-`sway` · `swaylock` · `swayidle` · `waybar` · `fuzzel` · `foot` · `mako` · `grim` · `slurp` · `swappy` · `wl-clipboard` · `cliphist` · `wlsunset` · `kanshi` · `xdg-desktop-portal-wlr` · `brightnessctl` · `playerctl`
+`sway` · `swaylock` · `swayidle` · `waybar` · `fuzzel` · `foot` · `mako` · `grim` · `slurp` · `wl-clipboard` · `cliphist` · `wlsunset` · `kanshi` · `xdg-desktop-portal-wlr` · `brightnessctl` · `playerctl`
 
 ### Hyprland stack (via `ppa:cppiber/hyprland`)
 `hyprland` · `hyprlock` · `hypridle` · `hyprpaper` · `hyprsunset` · `hyprpicker` · `xdg-desktop-portal-hyprland` · `waybar` · `fuzzel` · `kitty` · `mako`
 
 ### Shared tools
-`yazi` (Wayland-native terminal file manager, written in Rust) · `grim` · `slurp` · `swappy` · `wl-clipboard` · `cliphist` · `xwayland` (passive fallback for legacy apps)
+`yazi` (Wayland-native terminal file manager, written in Rust) · `grim` · `slurp` · `wl-clipboard` · `cliphist` · `xwayland` (passive fallback for legacy apps)
 
 ## Scripts
 
@@ -71,7 +71,8 @@ XWayland remains installed as a passive fallback for apps that have no Wayland b
 | `Super + F` | Fullscreen |
 | `Super + 1–5` | Switch workspace |
 | `Super + Shift + 1–5` | Move window to workspace |
-| `Print` | Screenshot region → swappy |
+| `Print` | Screenshot region → clipboard |
+| `Shift + Print` | Screenshot fullscreen → ~/Pictures |
 
 Sway keybindings are documented in `~/.config/sway/config` (heavily commented system default).
 
