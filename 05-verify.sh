@@ -30,6 +30,16 @@ check_cmd() {
   fi
 }
 
+check_path() {
+  local label="$1"
+  local path="$2"
+  if [[ -e "$path" ]]; then
+    check "$label" ok "$path"
+  else
+    check "$label" fail "missing: $path"
+  fi
+}
+
 check_file() {
   local label="$1"
   local path="$2"
@@ -85,7 +95,7 @@ check_cmd "hyprlock    " hyprlock
 check_cmd "hypridle    " hypridle
 check_cmd "hyprpaper   " hyprpaper
 check_cmd "hyprsunset  " hyprsunset
-check_cmd "hyprpolkitagent" hyprpolkitagent
+check_path "hyprpolkitagent" /usr/libexec/hyprpolkitagent
 check_cmd "hyprsysteminfo" hyprsysteminfo
 check_cmd "hyprpwcenter" hyprpwcenter
 check_cmd "hyprshutdown" hyprshutdown
