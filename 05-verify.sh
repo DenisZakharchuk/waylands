@@ -80,10 +80,15 @@ echo "════════════════════════�
 echo "  Hyprland stack"
 echo "══════════════════════════════════════════════════════"
 check_cmd "hyprland    " hyprland
+check_cmd "hyprctl     " hyprctl
 check_cmd "hyprlock    " hyprlock
 check_cmd "hypridle    " hypridle
 check_cmd "hyprpaper   " hyprpaper
 check_cmd "hyprsunset  " hyprsunset
+check_cmd "hyprpolkitagent" hyprpolkitagent
+check_cmd "hyprsysteminfo" hyprsysteminfo
+check_cmd "hyprpwcenter" hyprpwcenter
+check_cmd "hyprshutdown" hyprshutdown
 check_cmd "kitty       " kitty
 
 echo ""
@@ -108,7 +113,7 @@ echo "════════════════════════�
 echo "  Starter configs"
 echo "══════════════════════════════════════════════════════"
 check_file "Sway config        " "$HOME/.config/sway/config"
-check_file "Hyprland config    " "$HOME/.config/hypr/hyprland.conf"
+check_file "Hyprland Lua config" "$HOME/.config/hypr/hyprland.lua"
 check_file "Mako config        " "$HOME/.config/mako/config"
 
 echo ""

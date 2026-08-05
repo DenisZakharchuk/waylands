@@ -33,6 +33,10 @@ install_pkg hyprpaper
 install_pkg hyprsunset
 install_pkg hyprpicker
 install_pkg xdg-desktop-portal-hyprland
+install_pkg hyprpolkitagent
+install_pkg hyprsysteminfo
+install_pkg hyprpwcenter
+install_pkg hyprshutdown
 
 echo "==> Installing shared stack tools (waybar, fuzzel, kitty, mako, grim, etc.)..."
 # These are all in official Ubuntu repos
@@ -45,7 +49,6 @@ sudo apt install -y \
   slurp \
   wl-clipboard \
   cliphist \
-  policykit-1-gnome \
   xwayland
 
 echo ""
