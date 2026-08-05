@@ -4,6 +4,21 @@
 
 set -euo pipefail
 
+device_icon() {
+  local mac="$1"
+  if bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+    printf ''
+    return
+  fi
+
+  if bluetoothctl info "$mac" 2>/dev/null | grep -q "Paired: yes"; then
+    printf '󰂯'
+    return
+  fi
+
+  printf ''
+}
+
 # ── VS Code: force native Wayland via Ozone ──────────────────────────────────
 # Applies to: code (Microsoft), code-oss (open source build)
 
@@ -194,6 +209,7 @@ hl.window_rule({
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY")
+  hl.exec_cmd("blueman-applet")
   hl.exec_cmd(terminal)
   hl.exec_cmd("waybar")
   hl.exec_cmd("mako")
@@ -209,19 +225,162 @@ EOF
 
 configure_waybar() {
   mkdir -p "$HOME/.config/waybar"
-  if [[ ! -f "$HOME/.config/waybar/config.jsonc" ]]; then
-    # Copy system default if available
-    for candidate in \
-      /etc/waybar/config \
-      /usr/share/waybar/config.jsonc \
-      /usr/share/doc/waybar/examples/config; do
-      if [[ -f "$candidate" ]]; then
-        cp "$candidate" "$HOME/.config/waybar/config.jsonc"
-        echo "  [ok] ~/.config/waybar/config.jsonc (copied from $candidate)"
-        return
+  mkdir -p "$HOME/.config/waybar/scripts"
+
+  if [[ ! -f "$HOME/.config/waybar/scripts/bluetooth-status.sh" ]]; then
+    cat > "$HOME/.config/waybar/scripts/bluetooth-status.sh" <<'EOF'
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+status() {
+  local power_state="off"
+  local connected_lines
+  local connected_names=()
+  local connected_count=0
+
+  if bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
+    power_state="on"
+  fi
+
+  if [[ "$power_state" == "on" ]]; then
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      local device_mac device_name
+      device_mac="${line#Device }"
+      device_mac="${device_mac%% *}"
+      device_name="${line#Device $device_mac }"
+      connected_names+=("$device_name")
+    done < <(bluetoothctl devices Connected 2>/dev/null || true)
+    connected_count="${#connected_names[@]}"
+  fi
+
+  if [[ "$power_state" == "off" ]]; then
+    printf '{"text":"","tooltip":"Bluetooth off","class":"off"}'
+    return
+  fi
+
+  if [[ "$connected_count" -eq 0 ]]; then
+    printf '{"text":"","tooltip":"Bluetooth on | Connected: none","class":"on"}'
+    return
+  fi
+
+  local tooltip_names
+  tooltip_names=$(IFS=', '; printf '%s' "${connected_names[*]}")
+  printf '{"text":"%s","tooltip":"Bluetooth on | Connected: %s","class":"connected"}' "$connected_count" "$tooltip_names"
+}
+
+pick_device() {
+  local prompt="$1"
+  local filter_connected="${2:-false}"
+  local choices=()
+  local selected_mac=""
+  local line mac name icon
+
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    mac="${line#Device }"
+    mac="${mac%% *}"
+    name="${line#Device $mac }"
+    icon=$(device_icon "$mac")
+
+    if [[ "$filter_connected" == "true" ]]; then
+      if ! bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+        continue
       fi
-    done
-    echo "  [info] waybar example config not found — waybar will use its built-in defaults"
+    fi
+
+    choices+=("$icon  $name [$mac]")
+  done < <(bluetoothctl devices 2>/dev/null || true)
+
+  if [[ ${#choices[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  selected_mac=$(printf '%s\n' "${choices[@]}" | fuzzel -d -p "$prompt" | sed -n 's/.*\[\(.*\)\]$/\1/p')
+  [[ -n "$selected_mac" ]] || return 1
+  printf '%s\n' "$selected_mac"
+}
+
+menu() {
+  local action
+  action=$(printf '%s\n' \
+    'Toggle power' \
+    'Scan for devices' \
+    'Connect paired device' \
+    'Disconnect connected device' \
+    'Refresh' \
+    | fuzzel -d -p 'Bluetooth')
+
+  case "$action" in
+    'Toggle power')
+      if bluetoothctl show 2>/dev/null | grep -q 'Powered: yes'; then
+        bluetoothctl power off >/dev/null 2>&1 || true
+      else
+        bluetoothctl power on >/dev/null 2>&1 || true
+      fi
+      ;;
+    'Scan for devices')
+      bluetoothctl scan on >/dev/null 2>&1 || true
+      (sleep 8; bluetoothctl scan off >/dev/null 2>&1 || true) &
+      ;;
+    'Connect paired device')
+      if selected_mac=$(pick_device 'Connect'); then
+        bluetoothctl connect "$selected_mac" >/dev/null 2>&1 || true
+      fi
+      ;;
+    'Disconnect connected device')
+      if selected_mac=$(pick_device 'Disconnect' true); then
+        bluetoothctl disconnect "$selected_mac" >/dev/null 2>&1 || true
+      fi
+      ;;
+    'Refresh'|'')
+      ;;
+  esac
+}
+
+if [[ "${1:-}" == "--menu" ]]; then
+  menu
+  exit 0
+fi
+
+status
+EOF
+    chmod +x "$HOME/.config/waybar/scripts/bluetooth-status.sh"
+    echo "  [ok] ~/.config/waybar/scripts/bluetooth-status.sh"
+  fi
+
+  if [[ ! -f "$HOME/.config/waybar/config.jsonc" ]]; then
+    cat > "$HOME/.config/waybar/config.jsonc" <<'EOF'
+{
+  "layer": "top",
+  "position": "top",
+  "spacing": 10,
+  "margin-top": 6,
+  "margin-left": 8,
+  "margin-right": 8,
+  "modules-left": ["custom/bluetooth"],
+  "modules-center": ["clock"],
+  "modules-right": ["tray"],
+  "custom/bluetooth": {
+    "exec": "/home/zakharchukd/.config/waybar/scripts/bluetooth-status.sh",
+    "return-type": "json",
+    "interval": 5,
+    "signal": 8,
+    "on-click": "/home/zakharchukd/.config/waybar/scripts/bluetooth-status.sh --menu",
+    "on-click-right": "bluetoothctl power toggle",
+    "tooltip": true
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "{:%A, %d %B %Y}"
+  },
+  "tray": {
+    "spacing": 10
+  }
+}
+EOF
+    echo "  [ok] ~/.config/waybar/config.jsonc (created Bluetooth-aware bar)"
   else
     echo "  [skip] ~/.config/waybar/config.jsonc already exists"
   fi
