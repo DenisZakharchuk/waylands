@@ -86,6 +86,20 @@ EOF
 configure_hyprland() {
   local hypr_dir="$HOME/.config/hypr"
   mkdir -p "$hypr_dir"
+  local main_keyboard_name="at-translated-set-2-keyboard"
+
+  if command -v hyprctl &>/dev/null; then
+    local detected_keyboard_name
+    detected_keyboard_name=$(hyprctl devices 2>/dev/null | awk '
+      /Keyboards:/ { in_keyboards = 1; next }
+      /^Mice:/ { in_keyboards = 0 }
+      in_keyboards && /^[[:space:]]+[[:alnum:]].*$/ { device = $1; sub(/[[:space:]]+$/, "", device) }
+      in_keyboards && /main: yes/ { print device; exit }
+    ')
+    if [[ -n "$detected_keyboard_name" ]]; then
+      main_keyboard_name="$detected_keyboard_name"
+    fi
+  fi
 
   local hypr_lua="$hypr_dir/hyprland.lua"
     local refresh_managed_lua="false"
@@ -123,6 +137,7 @@ local terminal = "kitty"
 local fileManager = "kitty yazi"
 local menu = "fuzzel"
 local mainMod = "SUPER"
+local mainKeyboard = "${main_keyboard_name}"
 
 hl.config({
   general = {
@@ -159,7 +174,8 @@ hl.config({
   },
 
   input = {
-    kb_layout = "us",
+    kb_layout = "us,ua",
+    kb_options = "grp:alt_shift_toggle",
     follow_mouse = 1,
     touchpad = {
       natural_scroll = true,
@@ -193,6 +209,7 @@ end
 hl.bind(mainMod .. " + minus", hl.dsp.exec_cmd("hyprctl keyword cursor:zoom_factor 1.0"))
 hl.bind(mainMod .. " + equal", hl.dsp.exec_cmd("hyprctl keyword cursor:zoom_factor 1.25"))
 hl.bind(mainMod .. " + 0", hl.dsp.exec_cmd("hyprctl keyword cursor:zoom_factor 1.0"))
+hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("hyprctl switchxkblayout '" .. mainKeyboard .. "' next"))
 
 hl.window_rule({
   match = { class = "pavucontrol" },
@@ -359,7 +376,7 @@ EOF
   "margin-top": 6,
   "margin-left": 8,
   "margin-right": 8,
-  "modules-left": ["custom/bluetooth"],
+  "modules-left": ["custom/bluetooth", "hyprland/language"],
   "modules-center": ["clock"],
   "modules-right": ["tray"],
   "custom/bluetooth": {
@@ -370,6 +387,15 @@ EOF
     "on-click": "/home/zakharchukd/.config/waybar/scripts/bluetooth-status.sh --menu",
     "on-click-right": "bluetoothctl power toggle",
     "tooltip": true
+  },
+  "hyprland/language": {
+    "format": "{short}",
+    "format-us": "EN",
+    "format-ua": "UA",
+    "keyboard-name": "${main_keyboard_name}",
+    "on-click": "hyprctl switchxkblayout '${main_keyboard_name}' next",
+    "tooltip": true,
+    "tooltip-format": "{long}"
   },
   "clock": {
     "format": "{:%H:%M}",
