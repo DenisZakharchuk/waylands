@@ -211,6 +211,18 @@ hl.bind(mainMod .. " + equal", hl.dsp.exec_cmd("hyprctl keyword cursor:zoom_fact
 hl.bind(mainMod .. " + 0", hl.dsp.exec_cmd("hyprctl keyword cursor:zoom_factor 1.0"))
 hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("hyprctl switchxkblayout '" .. mainKeyboard .. "' next"))
 
+-- Laptop multimedia keys: volume, mic, brightness, playback
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+
 hl.window_rule({
   match = { class = "pavucontrol" },
   float = true,
@@ -378,7 +390,7 @@ EOF
   "margin-right": 8,
   "modules-left": ["custom/bluetooth", "hyprland/language"],
   "modules-center": ["clock"],
-  "modules-right": ["battery", "tray"],
+   "modules-right": ["pulseaudio", "battery", "tray"],
   "custom/bluetooth": {
     "exec": "/home/zakharchukd/.config/waybar/scripts/bluetooth-status.sh",
     "return-type": "json",
@@ -401,6 +413,17 @@ EOF
     "format": "{:%H:%M}",
     "tooltip-format": "{:%A, %d %B %Y}"
   },
+   "pulseaudio": {
+     "format": "{volume}% {icon}",
+     "format-muted": "MUTE ",
+     "format-icons": {
+       "default": ["", "", ""]
+     },
+     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+     "on-click-right": "pavucontrol",
+     "scroll-step": 5,
+     "tooltip": true
+   },
   "battery": {
     "states": {
       "warning": 30,
