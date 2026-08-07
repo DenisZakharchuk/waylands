@@ -378,7 +378,7 @@ EOF
   "margin-right": 8,
   "modules-left": ["custom/bluetooth", "hyprland/language"],
   "modules-center": ["clock"],
-  "modules-right": ["tray"],
+  "modules-right": ["battery", "tray"],
   "custom/bluetooth": {
     "exec": "/home/zakharchukd/.config/waybar/scripts/bluetooth-status.sh",
     "return-type": "json",
@@ -400,6 +400,19 @@ EOF
   "clock": {
     "format": "{:%H:%M}",
     "tooltip-format": "{:%A, %d %B %Y}"
+  },
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% ⚡",
+    "format-plugged": "{capacity}% ⚡",
+    "format-full": "{capacity}% ✓",
+    "format-icons": ["", "", "", "", ""],
+    "tooltip": true,
+    "tooltip-format": "{timeTo} | {capacity}%"
   },
   "tray": {
     "spacing": 10
