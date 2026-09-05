@@ -197,7 +197,7 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("hyprctl dispatch exit"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("sh -c 'command -v noctalia >/dev/null 2>&1 && exec noctalia msg panel-toggle launcher || exec " .. menu .. "'"))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("hyprctl dispatch fullscreen"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"))
 
@@ -238,10 +238,13 @@ hl.window_rule({
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY")
-  hl.exec_cmd("blueman-applet")
+  -- Noctalia has its own bluetooth widget; only run blueman-applet without it.
+  hl.exec_cmd("sh -c 'command -v noctalia >/dev/null 2>&1 || exec blueman-applet'")
   hl.exec_cmd(terminal)
-  hl.exec_cmd("waybar")
-  hl.exec_cmd("mako")
+  -- Noctalia (if installed) provides the bar + notifications; otherwise fall
+  -- back to waybar + mako. Avoids the mako/Noctalia D-Bus name conflict.
+  hl.exec_cmd("sh -c 'command -v noctalia >/dev/null 2>&1 || exec waybar'")
+  hl.exec_cmd("sh -c 'command -v noctalia >/dev/null 2>&1 && exec noctalia --daemon || exec mako'")
   hl.exec_cmd("hypridle")
   hl.exec_cmd("hyprpaper")
   hl.exec_cmd("hyprsunset")

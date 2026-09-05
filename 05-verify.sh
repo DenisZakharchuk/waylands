@@ -112,6 +112,25 @@ check_cmd "xwayland    " Xwayland
 
 echo ""
 echo "══════════════════════════════════════════════════════"
+echo "  Noctalia desktop shell (optional — installed by 06)"
+echo "══════════════════════════════════════════════════════"
+if command -v noctalia &>/dev/null || [[ -x /usr/local/bin/noctalia ]]; then
+  check_cmd  "noctalia    " noctalia
+  check_file "desktop entry" /usr/local/share/applications/dev.noctalia.Noctalia.desktop
+  check_path "runtime assets" /usr/local/share/noctalia/assets
+  check_file "stb resize2 hdr " /usr/local/include/stb/stb_image_resize2.h
+  check_file "stb write hdr   " /usr/local/include/stb/stb_image_write.h
+  if pkg-config --exists wireplumber-0.5 2>/dev/null; then
+    check "WirePlumber 0.5 " ok "$(pkg-config --modversion wireplumber-0.5)"
+  else
+    check "WirePlumber 0.5 " fail "wireplumber-0.5 pkg-config not found"
+  fi
+else
+  echo "  [skip] Noctalia not installed — run 06-install-noctalia.sh to add it"
+fi
+
+echo ""
+echo "══════════════════════════════════════════════════════"
 echo "  Wayland flags (VS Code, Chromium)"
 echo "══════════════════════════════════════════════════════"
 check_file "VS Code flags      " "$HOME/.config/code-flags.conf"
